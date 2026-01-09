@@ -1,0 +1,7 @@
+{
+  "name": "iiuivote",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
