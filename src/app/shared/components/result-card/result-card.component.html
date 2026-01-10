@@ -1,0 +1,36 @@
+<div class="flex flex-col p-4 rounded-2xl border transition-all duration-500" [ngClass]="{
+        'bg-blue-50/40 border-blue-200 shadow-sm shadow-blue-100/50': rank() === 1,
+        'bg-white border-gray-100': rank() !== 1
+    }">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+            <div class="relative flex-shrink-0">
+                <img [src]="candidate().imageUrl" [alt]="candidate().name"
+                    class="w-11 h-11 rounded-lg object-cover shadow-sm border border-gray-100" />
+                @if (rank()) {
+                <div
+                    class="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-orange-500 text-white text-[9px] font-black rounded-full border-2 border-white flex items-center justify-center shadow-sm">
+                    {{ rank() }}
+                </div>
+                }
+            </div>
+            <div class="min-w-0">
+                <h3 class="text-sm font-bold text-gray-900 leading-tight truncate tracking-tight"
+                    [ngClass]="{'text-blue-700': rank() === 1}">
+                    {{ candidate().name }}
+                </h3>
+                <p class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{{ candidate().votes |
+                    number }} votes</p>
+            </div>
+        </div>
+        <div class="text-right">
+            <span class="text-base font-bold text-blue-700 tracking-tight">{{ percentage() | number:'1.1-1' }}%</span>
+        </div>
+    </div>
+
+    <div class="relative w-full h-1.5 bg-gray-100/80 rounded-full overflow-hidden">
+        <div class="absolute top-0 left-0 h-full transition-all duration-1000 ease-out rounded-full"
+            [style.width.%]="percentage()" [style.background-color]="rank() === 1 ? '#2563eb' : candidate().color">
+        </div>
+    </div>
+</div>

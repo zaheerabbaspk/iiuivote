@@ -1,0 +1,43 @@
+<div (click)="onSelect()"
+    class="group relative flex items-start gap-4 p-4 mb-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden"
+    [ngClass]="{
+    'border-blue-500 bg-blue-50/50 shadow-md ring-1 ring-blue-200': selected(),
+    'border-gray-100 bg-white hover:border-blue-200 hover:bg-gray-50': !selected()
+  }">
+    <!-- Animated Checkmark (Selected State) -->
+    @if (selected()) {
+    <div class="absolute top-3 right-3 text-blue-600 animate-in zoom-in duration-300">
+        <ion-icon name="checkmark-circle" class="text-2xl"></ion-icon>
+    </div>
+    } @else {
+    <div
+        class="absolute top-3 right-3 w-6 h-6 border-2 border-gray-200 rounded-full group-hover:border-blue-300 transition-colors">
+    </div>
+    }
+
+    <!-- Candidate Image -->
+    <div class="relative flex-shrink-0">
+        <img [src]="candidate().imageUrl" [alt]="candidate().name"
+            class="w-20 h-20 rounded-xl object-cover shadow-sm border border-gray-100" />
+        @if (selected()) {
+        <div
+            class="absolute -top-1 -right-1 bg-blue-600 text-white px-1.5 rounded-full border-2 border-white shadow-sm">
+            <ion-icon name="checkmark-circle" class="text-xs"></ion-icon>
+        </div>
+        }
+    </div>
+
+    <!-- Candidate Details -->
+    <div class="flex-1 min-w-0 pr-6">
+        <h3 class="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">
+            {{ candidate().name }}
+        </h3>
+        <p class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+            {{ candidate().department }}
+        </p>
+        <p class="text-sm text-gray-500 leading-relaxed line-clamp-2 font-medium">
+            {{ candidate().description }}
+        </p>
+    </div>
+
+</div>
