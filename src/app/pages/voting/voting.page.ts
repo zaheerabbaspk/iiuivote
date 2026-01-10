@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBack, arrowForward } from 'ionicons/icons';
 import { Candidate } from '../../models/election.model';
 import { CandidateCardComponent } from '../../shared/components/candidate-card/candidate-card.component';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-voting',
@@ -13,6 +14,7 @@ import { CandidateCardComponent } from '../../shared/components/candidate-card/c
     templateUrl: './voting.page.html',
 })
 export class VotingPage {
+    router = inject(Router);
     candidates = signal<Candidate[]>([
         {
             id: '1',
@@ -61,6 +63,7 @@ export class VotingPage {
         if (this.selectedId()) {
             console.log('Casting vote for:', this.selectedId());
             // Logic for casting vote
+            this.router.navigate(['/results']);
         }
     }
 }
