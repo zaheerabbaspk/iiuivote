@@ -1,0 +1,48 @@
+:host {
+    ion-content {
+        --background: white;
+    }
+}
+
+/* Custom Ionic Input Override for cleaner look */
+ion-input {
+    --padding-start: 12px !important;
+    --padding-end: 12px !important;
+    --background: transparent !important;
+    --color: #1a1a1a !important;
+    --placeholder-color: #9ca3af !important;
+    --placeholder-opacity: 1;
+    font-size: 0.95rem;
+    min-height: 48px;
+}
+
+/* Remove default Ionic borders/highlights */
+.item-native {
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+form>div {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+form>div:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+form>div:nth-child(3) {
+    animation-delay: 0.2s;
+}

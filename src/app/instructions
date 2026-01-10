@@ -1,0 +1,298 @@
+MULTI-CLUB / MULTI-POSITION VOTING FLOW SPEC
+1. Core Concept (lock this in first)
+
+One Election
+
+Election contains multiple Clubs / Bodies
+
+Each Club has multiple Positions
+
+Each Position has multiple Candidates
+
+Each Voter must vote:
+
+Once per position
+
+For all required positions (or explicitly skip if allowed)
+
+Example:
+
+Election: Spring 2026 Student Elections
+
+Club: Sports Club
+  - President
+  - Vice President
+
+Club: Library Club
+  - President
+  - Secretary
+
+2. Updated Data Model (Backend-driven, but UI depends on this)
+Election
+
+id
+
+name
+
+status
+
+Club
+
+id
+
+electionId
+
+name
+
+Position
+
+id
+
+clubId
+
+name
+
+isRequired (boolean)
+
+Candidate
+
+id
+
+positionId
+
+name
+
+description
+
+Vote
+
+voterId
+
+positionId
+
+candidateId
+
+VoterProgress (IMPORTANT)
+
+voterId
+
+electionId
+
+completedPositions[] OR completionCount
+
+3. User Voting Flow (High Level)
+Login
+ → Load Election
+ → Iterate Clubs
+   → Iterate Positions
+     → Vote per position
+ → Submit final ballot
+ → Lock voter
+
+
+Voting is not one click anymore. It’s a guided ballot flow.
+
+4. Voting UI Structure (Frontend)
+Route
+/vote
+
+
+Single route. UI changes internally.
+
+5. VoteComponent Responsibilities
+Component
+
+VoteComponent (standalone)
+
+State (signals)
+
+currentClubIndex
+
+currentPositionIndex
+
+selectedCandidate
+
+completedPositions (Set or Map)
+
+electionData (clubs → positions → candidates)
+
+6. UI Layout Logic
+Header
+
+Election name
+
+Progress indicator:
+
+Club 2 of 5 · Position 1 of 3
+
+Main Content
+
+Club name
+
+Position title
+
+Candidate list (radio buttons)
+
+Footer Controls
+
+Next
+
+Back
+
+Skip (only if position is not required)
+
+Final Submit (only on last position)
+
+7. Per-Position Voting Rules
+
+Exactly one candidate per position
+
+Cannot proceed unless:
+
+Candidate selected OR
+
+Position is optional and skipped
+
+Selection is stored locally only until final submit
+
+8. Navigation Logic (Critical)
+Next button
+
+Saves selection to local vote map:
+
+votes[positionId] = candidateId
+
+
+Advances to next position
+
+If last position in club:
+
+Move to next club
+
+Back button
+
+Moves backward
+
+Restores previous selection
+
+9. Vote Review Step (Optional but recommended)
+UI
+
+Summary list:
+
+Sports Club
+  President → John
+  Vice President → Sarah
+
+Library Club
+  President → Ali
+  Secretary → Fatima
+
+
+Confirm button
+
+This massively boosts project quality.
+
+10. Final Submission Flow
+On confirm
+
+Send payload:
+
+{
+  voterId,
+  electionId,
+  votes: [
+    { positionId, candidateId },
+    ...
+  ]
+}
+
+Backend validation
+
+Election active
+
+Voter not locked
+
+One vote per position
+
+Candidate belongs to position
+
+Required positions not missing
+
+Backend actions
+
+Persist all votes in transaction
+
+Mark voter as completed
+
+Invalidate auth token
+
+11. Post-Submission Behavior
+Frontend
+
+Clear auth state
+
+Redirect to confirmation page
+
+Backend
+
+Block any further access from voter
+
+12. Results Aggregation (Admin Side)
+
+Results are grouped like:
+
+Club
+ → Position
+   → Candidate → vote count
+
+
+Admin never sees individual ballots, only aggregates.
+
+13. Edge Cases (don’t ignore these)
+
+Voter refreshes page mid-vote:
+
+Reload state from backend OR
+
+Force restart (simpler for uni project)
+
+Position has only one candidate:
+
+Auto-select, but still require confirmation
+
+Optional positions:
+
+Must be explicitly skipped
+
+14. UI Component Breakdown (User Side)
+VoteComponent
+├── ClubStepperComponent
+├── PositionCardComponent
+├── CandidateListComponent
+└── VoteSummaryComponent
+
+
+All standalone, signal-based inputs only.
+
+15. Why This Design Is Correct
+
+Scales to any number of clubs
+
+No hardcoded assumptions
+
+Mirrors real student elections
+
+Easy to explain in viva
+
+Backend enforces integrity
+
+16. Common Dumb Mistakes (don’t do these)
+
+One-page giant form for all positions
+
+Submitting votes per position separately
+
+Letting users jump between clubs freely
+
+Trusting frontend to enforce completeness
