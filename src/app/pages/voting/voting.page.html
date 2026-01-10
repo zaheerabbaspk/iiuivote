@@ -1,0 +1,65 @@
+<ion-content class="bg-gray-50/30">
+    <div class="max-w-2xl mx-auto px-6 py-8">
+
+        <!-- Back Header -->
+        <div class="flex items-center gap-2 mb-8 opacity-0 animate-slide-up animate-delay-1">
+            <ion-icon name="arrow-back" class="text-blue-600 text-lg"></ion-icon>
+            <span class="text-gray-500 font-medium text-sm">Back to Home</span>
+        </div>
+
+        <!-- Page Title -->
+        <header class="mb-6 opacity-0 animate-slide-up animate-delay-2 text-center md:text-left transition-all">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight mb-3">
+                Student Union Elections 2024
+            </h1>
+            <p class="text-sm text-gray-400 leading-relaxed max-w-lg mx-auto md:mx-0 font-medium">
+                Annual election for the Student Union President position. Vote for the candidate who best represents
+                your vision for our university.
+            </p>
+        </header>
+
+        <!-- Position Badge -->
+        <div class="mb-10 opacity-0 animate-slide-up animate-delay-3">
+            <span
+                class="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-bold border border-blue-100">
+                Position: Student Union President
+            </span>
+        </div>
+
+        <!-- Candidate List -->
+        <div class="space-y-4 mb-24">
+            @for (candidate of candidates(); track candidate.id; let i = $index) {
+            <div class="opacity-0 animate-slide-up" [class]="'animate-delay-' + (i + 4)">
+                <app-candidate-card [candidate]="candidate" [selected]="selectedId() === candidate.id"
+                    (select)="selectCandidate($event)"></app-candidate-card>
+            </div>
+            }
+        </div>
+
+        <!-- Floating Action Bar -->
+        @if (selectedId()) {
+        <div
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 transition-all duration-500 animate-in fade-in slide-in-from-bottom-5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Selected:</p>
+                    <p class="text-base font-bold text-blue-600 truncate leading-tight">
+                        {{ getSelectedCandidate()?.name }}
+                    </p>
+                </div>
+                <button (click)="castVote()"
+                    class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95 whitespace-nowrap">
+                    Cast Vote
+                    <ion-icon name="arrow-forward" class="text-sm"></ion-icon>
+                </button>
+            </div>
+        </div>
+
+        } @else {
+        <div
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100 p-4 text-center">
+            <p class="text-gray-500 text-sm font-medium">Select a candidate to cast your vote</p>
+        </div>
+        }
+    </div>
+</ion-content>

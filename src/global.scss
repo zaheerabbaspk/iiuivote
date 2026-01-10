@@ -1,5 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply antialiased text-gray-900;
+}
+
+
 /*
  * App Global CSS
+
  * ----------------------------------------------------------------------------
  * Put style rules here that you want to apply globally. These styles are for
  * the entire app and not just one component. Additionally, this file can be
@@ -8,6 +19,7 @@
  * For more information on global stylesheets, visit the documentation:
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
+
 
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
@@ -35,3 +47,43 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+.animate-delay-1 {
+    animation-delay: 100ms;
+}
+
+.animate-delay-2 {
+    animation-delay: 200ms;
+}
+
+.animate-delay-3 {
+    animation-delay: 300ms;
+}
+
+.animate-delay-4 {
+    animation-delay: 400ms;
+}
+
+.animate-delay-5 {
+    animation-delay: 500ms;
+}
+
+.animate-delay-6 {
+    animation-delay: 600ms;
+}
+
+.animate-delay-7 {
+    animation-delay: 700ms;
+}
+
+.animate-delay-8 {
+    animation-delay: 800ms;
+}
+
+.animate-delay-9 {
+    animation-delay: 900ms;
+}
+
+.animate-delay-10 {
+    animation-delay: 1000ms;
+}
