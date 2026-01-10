@@ -1,11 +1,12 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBack, arrowForward } from 'ionicons/icons';
 import { Candidate } from '../../models/election.model';
+import { ElectionService } from '../../services/election.service';
 import { CandidateCardComponent } from '../../shared/components/candidate-card/candidate-card.component';
-import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-voting',
@@ -15,40 +16,33 @@ import { Router } from '@angular/router';
 })
 export class VotingPage {
     router = inject(Router);
-    candidates = signal<Candidate[]>([
-        {
-            id: '1',
-            name: 'Sarah Mitchell',
-            department: 'Business Administration',
-            description: 'Committed to enhancing student welfare, improving campus facilities, and fostering a more inclusive university environment.',
-            imageUrl: 'https://i.pravatar.cc/150?u=sarah',
-            votes: 343,
-            color: '#2563eb'
-        },
-        {
-            id: '2',
-            name: 'James Chen',
-            department: 'Computer Science',
-            description: 'Focused on mental health support, sustainable campus initiatives, and stronger industry partnerships for better career opportunities.',
-            imageUrl: 'https://i.pravatar.cc/150?u=james',
-            votes: 291,
-            color: '#059669'
-        },
-        {
-            id: '3',
-            name: 'Aisha Patel',
-            department: 'Social Sciences',
-            description: 'Advocating for affordable education, improved study spaces, and a vibrant cultural exchange program across all departments.',
-            imageUrl: 'https://i.pravatar.cc/150?u=aisha',
-            votes: 256,
-            color: '#dc2626'
-        }
-    ]);
+    electionService = inject(ElectionService);
+    candidates = signal<Candidate[]>([]);
 
     selectedId = signal<string | null>(null);
 
     constructor() {
         addIcons({ arrowBack, arrowForward });
+        this.loadCandidates();
+    }
+
+    loadCandidates() {
+        this.electionService.getCandidates().subscribe({
+            next: (data) => {
+                // Map API data to UI model
+                const mapped = data.map((c: any) => ({
+                    id: c.id.toString(),
+                    name: c.name,
+                    department: c.position,
+                    description: '',
+                    imageUrl: `https://i.pravatar.cc/150?u=${c.id}`,
+                    votes: c.votes_count,
+                    color: '#2563eb'
+                }));
+                this.candidates.set(mapped);
+            },
+            error: (err) => console.error('Error loading candidates', err)
+        });
     }
 
     selectCandidate(id: string) {
@@ -60,10 +54,20 @@ export class VotingPage {
     }
 
     castVote() {
-        if (this.selectedId()) {
-            console.log('Casting vote for:', this.selectedId());
-            // Logic for casting vote
-            this.router.navigate(['/results']);
+        const selectedId = this.selectedId();
+        if (selectedId) {
+            console.log('Casting vote for:', selectedId);
+            // In a real app, get user_id from auth state
+            const userId = 1; // Placeholder for now
+            this.electionService.submitVote(userId, parseInt(selectedId)).subscribe({
+                next: () => {
+                    this.router.navigate(['/results']);
+                },
+                error: (err) => {
+                    console.error('Error casting vote', err);
+                    alert(err.error.detail || 'Failed to submit vote');
+                }
+            });
         }
     }
 }

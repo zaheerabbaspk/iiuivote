@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -6,6 +6,7 @@ import { refreshOutline, shareSocialOutline, peopleOutline, trendingUpOutline, t
 import { Candidate, ElectionStats } from '../../models/election.model';
 import { ResultCardComponent } from '../../shared/components/result-card/result-card.component';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
+import { ElectionService } from '../../services/election.service';
 
 @Component({
     selector: 'app-results',
@@ -13,43 +14,16 @@ import { StatCardComponent } from '../../shared/components/stat-card/stat-card.c
     imports: [CommonModule, IonContent, IonIcon, ResultCardComponent, StatCardComponent],
     templateUrl: './results.page.html',
 })
-export class ResultsPage {
-    candidates = signal<Candidate[]>([
-        {
-            id: '1',
-            name: 'Sarah Mitchell',
-            department: 'Business Administration',
-            description: 'Business Administration',
-            imageUrl: 'https://i.pravatar.cc/150?u=sarah',
-            votes: 343,
-            color: '#2563eb'
-        },
-        {
-            id: '2',
-            name: 'James Chen',
-            department: 'Computer Science',
-            description: 'Computer Science',
-            imageUrl: 'https://i.pravatar.cc/150?u=james',
-            votes: 291,
-            color: '#059669'
-        },
-        {
-            id: '3',
-            name: 'Aisha Patel',
-            department: 'Social Sciences',
-            description: 'Social Sciences',
-            imageUrl: 'https://i.pravatar.cc/150?u=aisha',
-            votes: 256,
-            color: '#dc2626'
-        }
-    ]);
+export class ResultsPage implements OnInit {
+    electionService = inject(ElectionService);
+    candidates = signal<Candidate[]>([]);
 
     stats = signal<ElectionStats>({
-        totalVotes: 1090,
-        voterTurnout: 20.1,
+        totalVotes: 0,
+        voterTurnout: 0,
         eligibleVoters: 5420,
         timeRemaining: '0h 0m',
-        lastUpdated: '17:44:08'
+        lastUpdated: new Date().toLocaleTimeString()
     });
 
     totalVotesCount = computed(() => {
@@ -64,8 +38,37 @@ export class ResultsPage {
         addIcons({ refreshOutline, shareSocialOutline, peopleOutline, trendingUpOutline, timeOutline, checkboxOutline });
     }
 
+    ngOnInit() {
+        this.loadResults();
+    }
+
+    loadResults() {
+        this.electionService.getResults().subscribe({
+            next: (data) => {
+                const mapped = data.map((c: any) => ({
+                    id: c.candidate_id.toString(),
+                    name: c.name,
+                    department: c.position,
+                    description: c.position,
+                    imageUrl: `https://i.pravatar.cc/150?u=${c.candidate_id}`,
+                    votes: c.votes_count,
+                    color: '#2563eb'
+                }));
+                this.candidates.set(mapped);
+
+                const total = mapped.reduce((acc, curr) => acc + curr.votes, 0);
+                this.stats.update(s => ({
+                    ...s,
+                    totalVotes: total,
+                    voterTurnout: parseFloat(((total / s.eligibleVoters) * 100).toFixed(1)),
+                    lastUpdated: new Date().toLocaleTimeString()
+                }));
+            },
+            error: (err) => console.error('Error loading results', err)
+        });
+    }
+
     refreshResults() {
-        console.log('Refreshing results...');
-        // Logic to refresh data
+        this.loadResults();
     }
 }

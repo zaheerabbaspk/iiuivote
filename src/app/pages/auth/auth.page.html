@@ -1,13 +1,41 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>auth</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="auth-content">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>{{ isLogin ? 'Login to Vote' : 'Register Voter' }}</h1>
+        <p>{{ isLogin ? 'Welcome back! Please enter your details.' : 'Create an account to participate in the election.'
+          }}</p>
+      </div>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">auth</ion-title>
-    </ion-toolbar>
-  </ion-header>
+      <form (ngSubmit)="onSubmit()" #authForm="ngForm">
+        <div class="form-group" *ngIf="!isLogin">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" [(ngModel)]="userData.full_name" required
+            placeholder="Enter your full name">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" [(ngModel)]="userData.email" required
+            placeholder="email@university.edu">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" [(ngModel)]="userData.password" required
+            placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="!authForm.form.valid">
+          {{ isLogin ? 'Sign In' : 'Create Account' }}
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>{{ isLogin ? "Don't have an account?" : "Already have an account?" }}
+          <a (click)="toggleMode()">{{ isLogin ? 'Register' : 'Login' }}</a>
+        </p>
+      </div>
+    </div>
+  </div>
 </ion-content>
