@@ -46,3 +46,26 @@ form>div:nth-child(2) {
 form>div:nth-child(3) {
     animation-delay: 0.2s;
 }
+
+.otp-input-premium {
+    --otp-input-background: white;
+    --otp-input-border-color: #f3f4f6;
+    --otp-input-border-width: 2px;
+    --otp-input-border-radius: 12px;
+    --otp-input-color: #0549b4;
+    --otp-input-font-size: 1.5rem;
+    --otp-input-font-weight: 700;
+    --otp-input-box-shadow: none;
+
+    // Focus state (handled via shadow or custom properties if supported)
+    &:focus-within {
+        --otp-input-border-color: #0549b4;
+    }
+
+    &.invalid {
+        --otp-input-border-color: #fca5a5;
+    }
+
+    // Individual box styling if ion-input-otp supports it via parts or variables
+    // Note: Ionic 8 ion-input-otp uses shadow DOM.
+}

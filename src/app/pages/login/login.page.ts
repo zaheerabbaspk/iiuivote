@@ -9,7 +9,8 @@ import {
     IonLabel,
     IonIcon,
     IonText,
-    IonSpinner
+    IonSpinner,
+    IonInputOtp
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -37,7 +38,8 @@ import {
         IonLabel,
         IonIcon,
         IonText,
-        IonSpinner
+        IonSpinner,
+        IonInputOtp
     ]
 })
 export class LoginPage implements OnInit {
@@ -56,8 +58,7 @@ export class LoginPage implements OnInit {
         });
 
         this.loginForm = this.fb.group({
-            universityId: ['', [Validators.required, Validators.minLength(3)]],
-            accessToken: ['', [Validators.required, Validators.minLength(6)]]
+            accessToken: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
         });
     }
 
