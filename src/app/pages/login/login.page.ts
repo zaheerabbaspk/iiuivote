@@ -81,6 +81,7 @@ export class LoginPage implements OnInit {
         }
     }
 
+    // lp
     private markFormGroupTouched(formGroup: FormGroup) {
         Object.values(formGroup.controls).forEach(control => {
             control.markAsTouched();
