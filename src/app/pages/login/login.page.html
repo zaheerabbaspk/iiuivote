@@ -1,0 +1,132 @@
+<ion-content [fullscreen]="true" class="ion-no-padding" [scrollY]="false">
+    <div class="flex flex-col md:flex-row min-h-screen w-full bg-white">
+        <!-- Left Section: Marketing/Branding (Hidden on mobile) -->
+        <div
+            class="hidden md:flex md:w-1/2 bg-[#0549b4] text-white p-12 flex-col justify-between relative overflow-hidden">
+            <!-- Background Abstract Pattern -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48 blur-3xl"></div>
+
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-16">
+                    <div class="p-2 bg-white/10 rounded-xl backdrop-blur-sm">
+                        <ion-icon name="shield-checkmark-outline" class="text-3xl text-white"></ion-icon>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold tracking-tight">UniVote</h1>
+                        <p class="text-blue-100 text-sm opacity-80">University Elections</p>
+                    </div>
+                </div>
+
+                <div class="max-w-md">
+                    <h2 class="text-5xl font-extrabold leading-tight mb-6">
+                        Your Voice,<br />
+                        Your Choice,<br />
+                        Your Future.
+                    </h2>
+                    <p class="text-blue-100 text-lg mb-12 opacity-90 leading-relaxed">
+                        Participate in shaping your university's future through secure, transparent, and accessible
+                        digital elections.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4 group">
+                            <div class="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                                <ion-icon name="shield-checkmark-outline" class="text-xl"></ion-icon>
+                            </div>
+                            <span class="text-white/90">End-to-end encrypted voting</span>
+                        </div>
+                        <div class="flex items-center gap-4 group">
+                            <div class="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                                <ion-icon name="person-outline" class="text-xl"></ion-icon>
+                            </div>
+                            <span class="text-white/90">One person, one vote guarantee</span>
+                        </div>
+                        <div class="flex items-center gap-4 group">
+                            <div class="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                                <ion-icon name="lock-closed-outline" class="text-xl"></ion-icon>
+                            </div>
+                            <span class="text-white/90">Tamper-proof audit trail</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative z-10 text-blue-200 text-sm">
+                &copy; 2026 UniVote System. All rights reserved.
+            </div>
+        </div>
+
+        <!-- Right Section: Login Form -->
+        <div class="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-24 bg-gray-50/50">
+            <div class="w-full max-w-sm">
+                <!-- Logo for Mobile -->
+                <div class="md:hidden flex flex-col items-center mb-10">
+                    <div class="p-4 bg-[#0549b4] rounded-2xl mb-4 shadow-lg shadow-blue-200">
+                        <ion-icon name="shield-checkmark-outline" class="text-4xl text-white"></ion-icon>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900 leading-tight">UniVote</h1>
+                    <p class="text-gray-500 text-sm">Secure Elections</p>
+                </div>
+
+                <div class="mb-10 text-center md:text-left">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+                    <p class="text-gray-500">Sign in to access the voting portal</p>
+                </div>
+
+                <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-6">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center px-1">
+                            <label class="text-sm font-semibold text-gray-700">One-Time Access Token</label>
+                            <button type="button" (click)="toggleTokenVisibility()"
+                                class="text-xs font-medium text-[#0549b4] hover:text-blue-700 transition-colors flex items-center gap-1">
+                                <ion-icon [name]="showToken ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                                {{ showToken ? 'Hide' : 'Show' }}
+                            </button>
+                        </div>
+
+                        <div class="flex justify-center">
+                            <ion-input-otp [length]="6" formControlName="accessToken" [disabled]="isLoading"
+                                [type]="showToken ? 'text' : 'password'" class="otp-input-premium"
+                                [class.invalid]="loginForm.get('accessToken')?.touched && loginForm.get('accessToken')?.invalid">
+                            </ion-input-otp>
+                        </div>
+
+                        <div class="flex flex-col gap-1 px-1">
+                            <p *ngIf="loginForm.get('accessToken')?.touched && loginForm.get('accessToken')?.invalid"
+                                class="text-xs text-red-500">
+                                Please enter the complete 6-digit token
+                            </p>
+                            <p class="text-[10px] text-gray-400">
+                                Enter the 6-digit security code sent to your registered device.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="submit" [disabled]="isLoading"
+                        class="w-full bg-[#0549b4] hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span *ngIf="!isLoading">Continue</span>
+                        <ion-spinner *ngIf="isLoading" name="crescent" class="w-5 h-5"></ion-spinner>
+                        <ion-icon *ngIf="!isLoading" name="arrow-forward-outline"
+                            class="text-xl group-hover:translate-x-1 transition-transform"></ion-icon>
+                    </button>
+                </form>
+
+                <div class="mt-12 text-center">
+                    <p class="text-xs text-gray-400 px-8 leading-relaxed">
+                        By signing in, you agree to our <a href="#"
+                            class="text-[#0549b4] hover:underline transition-colors">Terms of Service</a> and <a
+                            href="#" class="text-[#0549b4] hover:underline transition-colors">Privacy Policy</a>
+                    </p>
+                </div>
+
+                <div class="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+                    <p class="text-[11px] text-blue-600/80 text-center leading-relaxed">
+                        <span class="font-bold">Demo:</span> Use any ID (e.g., STU2024001 for student) with any 6-digit
+                        access token.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</ion-content>
