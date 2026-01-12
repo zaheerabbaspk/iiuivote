@@ -17,8 +17,13 @@
 
     <!-- Candidate Image -->
     <div class="relative flex-shrink-0">
-        <img [src]="candidate().imageUrl" [alt]="candidate().name"
+        <!-- Show Image if available -->
+        <img *ngIf="candidate().imageUrl" [src]="candidate().imageUrl | safeUrl" [alt]="candidate().name"
             class="w-20 h-20 rounded-xl object-cover shadow-sm border border-gray-100" />
+
+        <!-- Show Icon if no image -->
+        <ion-icon *ngIf="!candidate().imageUrl" name="person-circle-outline" class="w-20 h-20 text-gray-300"></ion-icon>
+
         @if (selected()) {
         <div
             class="absolute -top-1 -right-1 bg-blue-600 text-white px-1.5 rounded-full border-2 border-white shadow-sm">

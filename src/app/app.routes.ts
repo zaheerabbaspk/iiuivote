@@ -3,12 +3,12 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'auth',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
   {
-    path: 'auth',
-    loadComponent: () => import('./pages/auth/auth.page').then(m => m.AuthPage)
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.page').then(m => m.LoginPage)
   },
   {
     path: 'voting',
@@ -19,4 +19,3 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/results/results.page').then(m => m.ResultsPage)
   }
 ];
-

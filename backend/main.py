@@ -1,19 +1,25 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import psycopg2.extras
-from passlib.context import CryptContext
+import bcrypt
 
 from database import get_db_connection, init_db
 from models import (
     UserCreate, UserResponse, LoginRequest, 
-    CandidateResponse, VoteRequest, ResultResponse
+    CandidateResponse, VoteRequest, ResultResponse,
+    CandidateCreate
 )
 
 app = FastAPI(title="University Voting App API")
 
-# Password hashing setup
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing setup (switching to direct bcrypt for compatibility)
+def get_password_hash(password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+
+def verify_password(plain_password, hashed_password):
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 # CORS Setup
 app.add_middleware(
@@ -27,12 +33,6 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     init_db()
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
 
 @app.post("/register", response_model=UserResponse)
 def register(user: UserCreate):
@@ -50,35 +50,63 @@ def register(user: UserCreate):
                 raise HTTPException(status_code=400, detail="Email already registered")
 
 @app.post("/login")
-def login(request: LoginRequest):
+def login(data: dict = Body(...)):
+    email = data.get("email")
+    password = data.get("password")
+    
+    print(f"--- Login Request Received ---")
+    print(f"Data: {data}")
+    
+    if not email or not password:
+        print("❌ Error: Missing email or password in request")
+        raise HTTPException(status_code=422, detail="Missing university ID or token")
+
     with get_db_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT * FROM users WHERE email = %s", (request.email,))
+            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
             user = cur.fetchone()
-            if not user or not verify_password(request.password, user["password"]):
-                raise HTTPException(status_code=401, detail="Invalid email or password")
             
-            # For simplicity, returning user info. In real app, return JWT.
+            if not user:
+                print(f"❌ Error: User not found -> {email}")
+                raise HTTPException(status_code=401, detail="Invalid university ID or token")
+            
+            if not verify_password(password, user["password"]):
+                print(f"❌ Error: Password mismatch for -> {email}")
+                raise HTTPException(status_code=401, detail="Invalid university ID or token")
+            
+            print(f"✅ Success: User logged in -> {email}")
             return {"id": user["id"], "full_name": user["full_name"], "email": user["email"]}
 
 @app.get("/candidates", response_model=List[CandidateResponse])
 def get_candidates():
     with get_db_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id, name, position, votes_count FROM candidates")
+            cur.execute("SELECT id, name, position, image_url, votes_count FROM candidates")
             return cur.fetchall()
+
+@app.post("/candidates", status_code=status.HTTP_201_CREATED)
+def add_candidate(candidate: CandidateCreate):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute(
+                    "INSERT INTO candidates (name, position, party, election_id, image_url) VALUES (%s, %s, %s, %s, %s) RETURNING id",
+                    (candidate.name, candidate.position, candidate.party, candidate.election_id, candidate.image_url)
+                )
+                new_id = cur.fetchone()[0]
+                return {"id": new_id, "message": "Candidate added successfully"}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/vote")
 def submit_vote(vote: VoteRequest):
     with get_db_connection() as conn:
         with conn.cursor() as cur:
             try:
-                # Insert vote (Unique constraint on user_id ensures voting only once)
                 cur.execute(
                     "INSERT INTO votes (user_id, candidate_id) VALUES (%s, %s)",
                     (vote.user_id, vote.candidate_id)
                 )
-                # Increment candidate vote count
                 cur.execute(
                     "UPDATE candidates SET votes_count = votes_count + 1 WHERE id = %s",
                     (vote.candidate_id,)
@@ -93,7 +121,22 @@ def submit_vote(vote: VoteRequest):
 def get_results():
     with get_db_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id as candidate_id, name, position, votes_count FROM candidates ORDER BY votes_count DESC")
+            cur.execute("SELECT id as candidate_id, name, position, party, election_id, image_url, votes_count FROM candidates ORDER BY votes_count DESC")
+            return cur.fetchall()
+
+@app.get("/admin/vote-logs")
+def get_vote_logs():
+    """Admin only endpoint to see who voted for whom"""
+    with get_db_connection() as conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT v.id, u.full_name as voter_name, u.email as university_id, 
+                       c.name as candidate_name, v.vote_time 
+                FROM votes v
+                JOIN users u ON v.user_id = u.id
+                JOIN candidates c ON v.candidate_id = c.id
+                ORDER BY v.vote_time DESC
+            """)
             return cur.fetchall()
 
 if __name__ == "__main__":

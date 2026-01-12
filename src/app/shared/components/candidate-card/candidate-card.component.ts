@@ -2,13 +2,14 @@ import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { checkmarkCircle } from 'ionicons/icons';
+import { checkmarkCircle, personCircleOutline } from 'ionicons/icons';
 import { Candidate } from '../../../models/election.model';
+import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 
 @Component({
     selector: 'app-candidate-card',
     standalone: true,
-    imports: [CommonModule, IonIcon],
+    imports: [CommonModule, IonIcon, SafeUrlPipe],
     templateUrl: './candidate-card.component.html',
 })
 export class CandidateCardComponent {
@@ -17,7 +18,7 @@ export class CandidateCardComponent {
     select = output<string>();
 
     constructor() {
-        addIcons({ checkmarkCircle });
+        addIcons({ checkmarkCircle, personCircleOutline });
     }
 
     onSelect() {

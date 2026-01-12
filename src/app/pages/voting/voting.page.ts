@@ -27,19 +27,11 @@ export class VotingPage {
     }
 
     loadCandidates() {
+        console.log('VotingPage: loadCandidates triggered');
         this.electionService.getCandidates().subscribe({
             next: (data) => {
-                // Map API data to UI model
-                const mapped = data.map((c: any) => ({
-                    id: c.id.toString(),
-                    name: c.name,
-                    department: c.position,
-                    description: '',
-                    imageUrl: `https://i.pravatar.cc/150?u=${c.id}`,
-                    votes: c.votes_count,
-                    color: '#2563eb'
-                }));
-                this.candidates.set(mapped);
+                console.log('VotingPage: Data received from service:', data);
+                this.candidates.set(data);
             },
             error: (err) => console.error('Error loading candidates', err)
         });
@@ -56,16 +48,25 @@ export class VotingPage {
     castVote() {
         const selectedId = this.selectedId();
         if (selectedId) {
-            console.log('Casting vote for:', selectedId);
-            // In a real app, get user_id from auth state
-            const userId = 1; // Placeholder for now
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                alert('Session expired. Please login again.');
+                this.router.navigate(['/login']);
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            const userId = user.id;
+
+            console.log('Casting vote for candidate:', selectedId, 'by user:', userId);
+
             this.electionService.submitVote(userId, parseInt(selectedId)).subscribe({
                 next: () => {
                     this.router.navigate(['/results']);
                 },
                 error: (err) => {
                     console.error('Error casting vote', err);
-                    alert(err.error.detail || 'Failed to submit vote');
+                    alert(err.error?.detail || 'Failed to submit vote. You might have already voted.');
                 }
             });
         }

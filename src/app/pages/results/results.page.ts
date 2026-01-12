@@ -45,18 +45,9 @@ export class ResultsPage implements OnInit {
     loadResults() {
         this.electionService.getResults().subscribe({
             next: (data) => {
-                const mapped = data.map((c: any) => ({
-                    id: c.candidate_id.toString(),
-                    name: c.name,
-                    department: c.position,
-                    description: c.position,
-                    imageUrl: `https://i.pravatar.cc/150?u=${c.candidate_id}`,
-                    votes: c.votes_count,
-                    color: '#2563eb'
-                }));
-                this.candidates.set(mapped);
+                this.candidates.set(data);
 
-                const total = mapped.reduce((acc, curr) => acc + curr.votes, 0);
+                const total = data.reduce((acc, curr) => acc + curr.votes, 0);
                 this.stats.update(s => ({
                     ...s,
                     totalVotes: total,
