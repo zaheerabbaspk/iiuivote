@@ -1,16 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ElectionService } from '../../services/election.service';
 import {
     IonContent,
-    IonButton,
-    IonInput,
-    IonItem,
-    IonLabel,
     IonIcon,
-    IonText,
-    IonSpinner,
-    IonInputOtp
+    IonSpinner
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -32,17 +28,13 @@ import {
         FormsModule,
         ReactiveFormsModule,
         IonContent,
-        IonButton,
-        IonInput,
-        IonItem,
-        IonLabel,
         IonIcon,
-        IonText,
-        IonSpinner,
-        IonInputOtp
+        IonSpinner
     ]
 })
 export class LoginPage implements OnInit {
+    private router = inject(Router);
+    private electionService = inject(ElectionService);
     loginForm: FormGroup;
     showToken = false;
     isLoading = false;
@@ -58,7 +50,8 @@ export class LoginPage implements OnInit {
         });
 
         this.loginForm = this.fb.group({
-            accessToken: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
+            email: ['', [Validators.required, Validators.email]],
+            password: ['', [Validators.required, Validators.minLength(6)]]
         });
     }
 
@@ -71,11 +64,26 @@ export class LoginPage implements OnInit {
     async onLogin() {
         if (this.loginForm.valid) {
             this.isLoading = true;
-            // Simulate API call
-            setTimeout(() => {
-                this.isLoading = false;
-                console.log('Login attempt with:', this.loginForm.value);
-            }, 2000);
+            const credentials = this.loginForm.value; // { email, password }
+
+            this.electionService.login(credentials).subscribe({
+                next: (response: any) => {
+                    this.isLoading = false;
+                    console.log('Login successful:', response);
+
+                    if (response.access_token) {
+                        localStorage.setItem('token', response.access_token);
+                    }
+                    localStorage.setItem('user', JSON.stringify(response));
+
+                    this.router.navigate(['/voting']);
+                },
+                error: (err: any) => {
+                    this.isLoading = false;
+                    console.error('Login failed', err);
+                    alert('Login failed. Please check your credentials.');
+                }
+            });
         } else {
             this.markFormGroupTouched(this.loginForm);
         }

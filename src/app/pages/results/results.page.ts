@@ -44,10 +44,21 @@ export class ResultsPage implements OnInit {
 
     loadResults() {
         this.electionService.getResults().subscribe({
-            next: (data) => {
-                this.candidates.set(data);
+            next: (data: any[]) => {
+                // Map backend data to frontend model if necessary
+                const mappedData: Candidate[] = data.map(c => ({
+                    id: c.id || c.candidate_id, // Handle potential backend differences
+                    name: c.name,
+                    department: c.position || c.department,
+                    description: c.party || c.description,
+                    imageUrl: c.image_url || c.imageUrl,
+                    votes: c.votes_count || c.votes,
+                    color: c.color || this.getRandomColor() // Fallback color
+                }));
 
-                const total = data.reduce((acc, curr) => acc + curr.votes, 0);
+                this.candidates.set(mappedData);
+
+                const total = mappedData.reduce((acc, curr) => acc + curr.votes, 0);
                 this.stats.update(s => ({
                     ...s,
                     totalVotes: total,
@@ -57,6 +68,11 @@ export class ResultsPage implements OnInit {
             },
             error: (err) => console.error('Error loading results', err)
         });
+    }
+
+    getRandomColor() {
+        const colors = ['#428cff', '#3dc2ff', '#5260ff', '#2dd36f', '#ffc409'];
+        return colors[Math.floor(Math.random() * colors.length)];
     }
 
     refreshResults() {

@@ -1,0 +1,93 @@
+<ion-content [fullscreen]="true" class="ion-no-padding">
+    <div class="flex min-h-screen w-full bg-white">
+        <!-- Auth Form Section -->
+        <div class="w-full flex items-center justify-center p-6 md:p-12 bg-gray-50/50">
+            <div class="w-full max-w-sm">
+                <div class="mb-8 text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="p-3 bg-[#0549b4] rounded-xl shadow-lg shadow-blue-200">
+                            <ion-icon name="person-outline" class="text-3xl text-white"></ion-icon>
+                        </div>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
+                    <p class="text-gray-500">Join the secure voting platform</p>
+                </div>
+
+                <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="space-y-6">
+                    <div class="space-y-4">
+                        <!-- Full Name -->
+                        <div class="space-y-1">
+                            <label class="text-sm font-semibold text-gray-700 ml-1">Full Name</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <ion-icon name="person-outline" class="text-gray-400"></ion-icon>
+                                </div>
+                                <input type="text" formControlName="full_name"
+                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl bg-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="John Doe"
+                                    [class.border-red-500]="registerForm.get('full_name')?.touched && registerForm.get('full_name')?.invalid">
+                            </div>
+                            <p *ngIf="registerForm.get('full_name')?.touched && registerForm.get('full_name')?.invalid"
+                                class="text-xs text-red-500 ml-1">
+                                Name is required (min 3 chars)
+                            </p>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-1">
+                            <label class="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <ion-icon name="mail-outline" class="text-gray-400"></ion-icon>
+                                </div>
+                                <input type="email" formControlName="email"
+                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl bg-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="student@university.edu"
+                                    [class.border-red-500]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+                            </div>
+                            <p *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid"
+                                class="text-xs text-red-500 ml-1">
+                                Valid email is required
+                            </p>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="space-y-1">
+                            <label class="text-sm font-semibold text-gray-700 ml-1">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <ion-icon name="lock-closed-outline" class="text-gray-400"></ion-icon>
+                                </div>
+                                <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                                    class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl bg-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="Create a password"
+                                    [class.border-red-500]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+                                <button type="button" (click)="togglePassword()"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                                </button>
+                            </div>
+                            <p *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid"
+                                class="text-xs text-red-500 ml-1">
+                                Password must be at least 6 characters
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="submit" [disabled]="isLoading || registerForm.invalid"
+                        class="w-full bg-[#0549b4] hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                        <span *ngIf="!isLoading">Sign Up</span>
+                        <ion-spinner *ngIf="isLoading" name="crescent" class="w-5 h-5"></ion-spinner>
+                    </button>
+
+                    <div class="text-center mt-4">
+                        <p class="text-sm text-gray-600">Already have an account?
+                            <a routerLink="/login"
+                                class="text-[#0549b4] font-semibold hover:underline cursor-pointer">Log In</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</ion-content>

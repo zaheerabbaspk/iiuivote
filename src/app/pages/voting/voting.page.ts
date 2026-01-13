@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBack, arrowForward } from 'ionicons/icons';
-import { Candidate } from '../../models/election.model';
 import { ElectionService } from '../../services/election.service';
+import { Candidate } from '../../models/election.model';
 import { CandidateCardComponent } from '../../shared/components/candidate-card/candidate-card.component';
 
 @Component({
@@ -17,6 +17,7 @@ import { CandidateCardComponent } from '../../shared/components/candidate-card/c
 export class VotingPage {
     router = inject(Router);
     electionService = inject(ElectionService);
+
     candidates = signal<Candidate[]>([]);
 
     selectedId = signal<string | null>(null);
@@ -29,11 +30,21 @@ export class VotingPage {
     loadCandidates() {
         console.log('VotingPage: loadCandidates triggered');
         this.electionService.getCandidates().subscribe({
-            next: (data) => {
-                console.log('VotingPage: Data received from service:', data);
-                this.candidates.set(data);
+            next: (data: any[]) => {
+                const mappedData: Candidate[] = data.map(c => ({
+                    id: c.id?.toString() || c.candidate_id?.toString(),
+                    name: c.name,
+                    department: c.position || c.department,
+                    description: c.party || c.description,
+                    imageUrl: c.image_url || c.imageUrl,
+                    votes: c.votes || 0,
+                    color: c.color || '#428cff'
+                }));
+                this.candidates.set(mappedData);
             },
-            error: (err) => console.error('Error loading candidates', err)
+            error: (err) => {
+                console.error('Error loading candidates', err);
+            }
         });
     }
 
@@ -61,11 +72,12 @@ export class VotingPage {
             console.log('Casting vote for candidate:', selectedId, 'by user:', userId);
 
             this.electionService.submitVote(userId, parseInt(selectedId)).subscribe({
-                next: () => {
+                next: (res) => {
+                    console.log('Vote submitted successfully', res);
                     this.router.navigate(['/results']);
                 },
                 error: (err) => {
-                    console.error('Error casting vote', err);
+                    console.error('Error submitting vote', err);
                     alert(err.error?.detail || 'Failed to submit vote. You might have already voted.');
                 }
             });
