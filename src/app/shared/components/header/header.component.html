@@ -1,31 +1,31 @@
 <ion-header class="ion-no-border">
-    <ion-toolbar class="px-4 py-2 bg-white">
+    <ion-toolbar class="px-2 sm:px-4 py-2 bg-white">
         <div class="flex items-center justify-between max-w-6xl mx-auto">
-            <div class="flex items-center gap-2">
-                <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <ion-icon name="finger-print-outline" class="text-white text-xl"></ion-icon>
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                    <ion-icon name="finger-print-outline" class="text-white text-lg sm:text-xl"></ion-icon>
                 </div>
                 <div>
-                    <h1 class="text-base font-bold text-gray-900 tracking-tight leading-none">IIUI Vote</h1>
-                    <p class="text-[10px] text-gray-400 font-medium">Student Portal</p>
+                    <h1 class="text-sm sm:text-base font-bold text-gray-900 tracking-tight leading-none">IIUI Vote</h1>
+                    <p class="text-[9px] sm:text-[10px] text-gray-400 font-medium leading-none mt-1">Student Portal</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-xl p-1">
+            <div class="flex items-center gap-0.5 bg-gray-50 border border-gray-100 rounded-xl p-0.5 sm:p-1">
                 <a routerLink="/voting" routerLinkActive="bg-white shadow-sm text-blue-600 ring-1 ring-black/5"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-blue-600 transition-all duration-300">
-                    <ion-icon name="finger-print-outline" class="text-base"></ion-icon>
-                    Vote
+                    class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-blue-600 transition-all duration-300">
+                    <ion-icon name="finger-print-outline" class="text-lg sm:text-base"></ion-icon>
+                    <span class="hidden sm:inline">Vote</span>
                 </a>
                 <a routerLink="/results" routerLinkActive="bg-white shadow-sm text-blue-600 ring-1 ring-black/5"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-blue-600 transition-all duration-300">
-                    <ion-icon name="stats-chart-outline" class="text-base"></ion-icon>
-                    Results
+                    class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-blue-600 transition-all duration-300">
+                    <ion-icon name="stats-chart-outline" class="text-lg sm:text-base"></ion-icon>
+                    <span class="hidden sm:inline">Results</span>
                 </a>
                 <button (click)="logout()"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-all duration-300">
-                    <ion-icon name="log-out-outline" class="text-base"></ion-icon>
-                    Logout
+                    class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-sm font-semibold text-red-500 hover:bg-red-50 transition-all duration-300">
+                    <ion-icon name="log-out-outline" class="text-lg sm:text-base"></ion-icon>
+                    <span class="hidden sm:inline">Logout</span>
                 </button>
             </div>
         </div>
