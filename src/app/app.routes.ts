@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { RegisterPage } from './pages/register/register.page';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -17,10 +18,12 @@ export const routes: Routes = [
   },
   {
     path: 'voting',
-    loadComponent: () => import('./pages/voting/voting.page').then(m => m.VotingPage)
+    loadComponent: () => import('./pages/voting/voting.page').then(m => m.VotingPage),
+    canActivate: [authGuard]
   },
   {
     path: 'results',
-    loadComponent: () => import('./pages/results/results.page').then(m => m.ResultsPage)
+    loadComponent: () => import('./pages/results/results.page').then(m => m.ResultsPage),
+    canActivate: [authGuard]
   }
 ];

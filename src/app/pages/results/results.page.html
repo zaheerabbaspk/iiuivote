@@ -12,14 +12,14 @@
                         <span class="text-[9px] font-bold text-green-600 uppercase tracking-wider">Live</span>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400 font-semibold tracking-wide uppercase">Student Union Elections 2024</p>
+                <p class="text-xs text-gray-400 font-semibold tracking-wide uppercase">University Voting System</p>
             </div>
 
             <div class="flex items-center gap-2">
                 <button (click)="refreshResults()"
                     class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-100 rounded-xl text-gray-600 font-bold text-xs shadow-sm hover:bg-gray-50 transition-all">
                     <ion-icon name="refresh-outline" class="text-base"></ion-icon>
-                    Pause
+                    Refresh
                 </button>
                 <button
                     class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-100 rounded-xl text-gray-600 font-bold text-xs shadow-sm hover:bg-gray-50 transition-all">
@@ -52,17 +52,49 @@
         <!-- Detailed Results Section -->
         <div
             class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm opacity-0 animate-slide-up animate-delay-6 transition-all">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-lg font-bold text-gray-900 tracking-tight">Student Union President</h2>
-                <span class="text-[10px] text-gray-400 uppercase tracking-widest">Updated: {{
-                    stats().lastUpdated }}</span>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div class="relative w-full md:w-72">
+                    <label
+                        class="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-1.5 ml-1">Select
+                        Election</label>
+                    <div class="relative">
+                        <select (change)="onElectionChange($event)"
+                            class="block w-full pl-4 pr-10 py-2.5 text-sm font-bold text-gray-900 bg-gray-50 border-none rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all">
+                            @for (election of allElectionResults(); track election.electionId) {
+                            <option [value]="election.electionId"
+                                [selected]="selectedElectionId() === election.electionId">
+                                {{ election.electionName }}
+                            </option>
+                            }
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                            <ion-icon name="chevron-down-outline" class="text-gray-400"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Updated Recently</span>
+                    <span class="text-xs font-bold text-gray-900">{{ stats().lastUpdated }}</span>
+                </div>
             </div>
 
             <div class="space-y-6">
+                @if (sortedCandidates().length > 0) {
                 @for (candidate of sortedCandidates(); track candidate.id; let i = $index) {
-                <div class="opacity-0 animate-slide-up" [class]="'animate-delay-' + (i + 7)">
+                <div class="opacity-0 animate-slide-up" [class]="'animate-delay-' + (i + 1)">
                     <app-result-card [candidate]="candidate" [totalVotes]="totalVotesCount()"
                         [rank]="i + 1"></app-result-card>
+                </div>
+                }
+                } @else if (selectedElectionId()) {
+                <div class="flex flex-col items-center justify-center py-12 text-center">
+                    <div class="p-4 bg-gray-50 rounded-full mb-3">
+                        <ion-icon name="people-outline" class="text-3xl text-gray-300"></ion-icon>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900">No Candidates Found</h3>
+                    <p class="text-xs text-gray-400 max-w-[200px]">There are no candidates registered for this election
+                        yet.</p>
                 </div>
                 }
             </div>

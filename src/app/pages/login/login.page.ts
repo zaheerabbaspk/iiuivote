@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import {
     IonContent,
     IonButton,
@@ -21,6 +22,7 @@ import {
     personOutline,
     lockClosedOutline
 } from 'ionicons/icons';
+import { ElectionService } from '../../services/election.service';
 
 @Component({
     selector: 'app-login',
@@ -43,6 +45,8 @@ import {
     ]
 })
 export class LoginPage implements OnInit {
+    private electionService = inject(ElectionService);
+    private router = inject(Router);
     loginForm: FormGroup;
     showToken = false;
     isLoading = false;
@@ -71,11 +75,21 @@ export class LoginPage implements OnInit {
     async onLogin() {
         if (this.loginForm.valid) {
             this.isLoading = true;
-            // Simulate API call
-            setTimeout(() => {
-                this.isLoading = false;
-                console.log('Login attempt with:', this.loginForm.value);
-            }, 2000);
+            this.electionService.login(this.loginForm.value.accessToken).subscribe({
+                next: (res: any) => {
+                    this.isLoading = false;
+                    if (res.status === 'success') {
+                        this.router.navigate(['/voting']);
+                    } else {
+                        alert(res.message || 'Login failed');
+                    }
+                },
+                error: (err: any) => {
+                    this.isLoading = false;
+                    console.error('Login error:', err);
+                    alert(err.error?.detail || 'Invalid access token. Please try again.');
+                }
+            });
         } else {
             this.markFormGroupTouched(this.loginForm);
         }

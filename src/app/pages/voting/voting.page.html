@@ -1,65 +1,117 @@
 <ion-content class="bg-gray-50/30">
     <div class="max-w-2xl mx-auto px-6 py-8">
 
-        <!-- Back Header -->
-        <div class="flex items-center gap-2 mb-8 opacity-0 animate-slide-up animate-delay-1">
-            <ion-icon name="arrow-back" class="text-blue-600 text-lg"></ion-icon>
-            <span class="text-gray-500 font-medium text-sm">Back to Home</span>
-        </div>
-
-        <!-- Page Title -->
-        <header class="mb-6 opacity-0 animate-slide-up animate-delay-2 text-center md:text-left transition-all">
-            <h1 class="text-3xl font-bold text-gray-900 tracking-tight mb-3">
-                Student Union Elections 2024
+        <!-- Header -->
+        <header class="mb-10 text-center md:text-left transition-all">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight mb-2">
+                {{ selectedElection() ? selectedElection()?.name : 'Secure Voting Portal' }}
             </h1>
-            <p class="text-sm text-gray-400 leading-relaxed max-w-lg mx-auto md:mx-0 font-medium">
-                Annual election for the Student Union President position. Vote for the candidate who best represents
-                your vision for our university.
+            <p class="text-sm text-gray-400 font-medium leading-relaxed">
+                {{ selectedElection() ? 'Select your preferred candidate for this position.' : 'Browse the categories
+                below and select your candidates for each election.' }}
             </p>
         </header>
 
-        <!-- Position Badge -->
-        <div class="mb-10 opacity-0 animate-slide-up animate-delay-3">
-            <span
-                class="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-bold border border-blue-100">
-                Position: Student Union President
-            </span>
-        </div>
+        <!-- Step 1: Election Categories -->
+        <div *ngIf="!selectedElection()" class="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div *ngFor="let election of elections()" (click)="selectElection(election)"
+                class="group relative flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden"
+                [ngClass]="getSelectionForElection(election.id) ? 'border-blue-500 bg-blue-50/10' : 'border-gray-100 bg-white hover:border-blue-200 hover:shadow-md'">
 
-        <!-- Candidate List -->
-        <div class="space-y-4 mb-24">
-            @for (candidate of candidates(); track candidate.id; let i = $index) {
-            <div class="opacity-0 animate-slide-up" [class]="'animate-delay-' + (i + 4)">
-                <app-candidate-card [candidate]="candidate" [selected]="selectedId() === candidate.id"
-                    (select)="selectCandidate($event)"></app-candidate-card>
+                <div class="flex items-center gap-4">
+                    <div class="p-3 rounded-xl transition-colors duration-300"
+                        [ngClass]="getSelectionForElection(election.id) ? 'bg-blue-600 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500'">
+                        <ion-icon [name]="getSelectionForElection(election.id) ? 'checkmark-circle' : 'school-outline'"
+                            class="text-2xl"></ion-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{
+                            election.name }}</h3>
+                        <div class="flex items-center gap-2">
+                            <p *ngIf="!getSelectionForElection(election.id)"
+                                class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">No candidate
+                                selected</p>
+                            <div *ngIf="getSelectionForElection(election.id)" class="flex items-center gap-1.5">
+                                <span
+                                    class="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Selected:</span>
+                                <span class="text-xs font-bold text-gray-700">{{
+                                    getSelectionForElection(election.id)?.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-gray-300 group-hover:text-blue-500 transition-all transform group-hover:translate-x-1">
+                    <ion-icon name="chevron-forward-outline" class="text-xl"></ion-icon>
+                </div>
             </div>
-            }
+
+            <!-- Empty Auth State -->
+            <div *ngIf="elections().length === 0" class="flex flex-col items-center justify-center py-24 text-center">
+                <div class="p-8 bg-gray-100 rounded-full mb-6 text-gray-300">
+                    <ion-icon name="person-outline" class="text-6xl"></ion-icon>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Unauthorized Access</h3>
+                <p class="text-gray-500 text-sm max-w-xs mx-auto">
+                    We couldn't find any active sessions for your token. Please log in again.
+                </p>
+            </div>
+
+            <div class="pb-32"></div>
         </div>
 
-        <!-- Floating Action Bar -->
-        @if (selectedId()) {
-        <div
-            class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 transition-all duration-500 animate-in fade-in slide-in-from-bottom-5">
-            <div class="flex items-center justify-between gap-3">
+        <!-- Step 2: Candidates Flow -->
+        <div *ngIf="selectedElection()" class="animate-in fade-in slide-in-from-right-8 duration-400">
+            <div (click)="clearSelection()"
+                class="inline-flex items-center gap-2 text-[#0549b4] font-bold text-sm mb-6 cursor-pointer hover:bg-blue-50 px-3 py-2 rounded-xl transition-all active:scale-95">
+                <ion-icon name="arrow-back"></ion-icon>
+                Back to Elections
+            </div>
+
+            <div class="space-y-4 mb-32">
+                <div *ngFor="let candidate of filteredCandidates()">
+                    <app-candidate-card [candidate]="candidate" [selected]="getSelectedCandidateId() === candidate.id"
+                        (select)="selectCandidate($event)">
+                    </app-candidate-card>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Bar: Cast Vote(s) -->
+        <div *ngIf="selectionCount() > 0 && !selectedElection()"
+            class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-[#0549b4] text-white rounded-3xl shadow-2xl p-5 transition-all duration-500 animate-in slide-in-from-bottom-8">
+            <div class="flex items-center justify-between gap-4">
                 <div class="flex-1 min-w-0">
-                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Selected:</p>
-                    <p class="text-base font-bold text-blue-600 truncate leading-tight">
-                        {{ getSelectedCandidate()?.name }}
+                    <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1 opacity-80">Ready to
+                        Submit</p>
+                    <p class="text-lg font-bold truncate leading-tight">
+                        {{ selectionCount() }} {{ selectionCount() === 1 ? 'Selection' : 'Selections' }} Made
                     </p>
                 </div>
-                <button (click)="castVote()"
-                    class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95 whitespace-nowrap">
-                    Cast Vote
-                    <ion-icon name="arrow-forward" class="text-sm"></ion-icon>
+                <button (click)="castVotes()" [disabled]="isLoading()"
+                    class="flex items-center justify-center gap-2 bg-white text-[#0549b4] font-extrabold px-6 py-4 rounded-2xl transition-all shadow-xl hover:bg-blue-50 active:scale-95 disabled:opacity-50">
+                    <span *ngIf="!isLoading()">Finalize Vote</span>
+                    <ion-spinner *ngIf="isLoading()" name="crescent" class="w-5 h-5"></ion-spinner>
+                    <ion-icon *ngIf="!isLoading()" name="arrow-forward" class="text-lg"></ion-icon>
                 </button>
             </div>
         </div>
 
-        } @else {
-        <div
-            class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100 p-4 text-center">
-            <p class="text-gray-500 text-sm font-medium">Select a candidate to cast your vote</p>
+        <!-- Mini Selection Bar in Candidates View -->
+        <div *ngIf="selectedElection() && getSelectedCandidateId()"
+            class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-white border border-gray-100 rounded-3xl shadow-2xl p-4 animate-in slide-in-from-bottom-5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex-1 min-w-0 bg-blue-50/50 px-4 py-3 rounded-2xl">
+                    <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Selected Candidate:
+                    </p>
+                    <p class="text-base font-bold text-gray-900 truncate">{{ getSelectedCandidateName() }}</p>
+                </div>
+                <button (click)="clearSelection()"
+                    class="bg-[#0549b4] text-white font-bold px-6 py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
+                    Confirm Selection
+                </button>
+            </div>
         </div>
-        }
+
     </div>
 </ion-content>

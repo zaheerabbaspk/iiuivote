@@ -1,3 +1,8 @@
+export interface Election {
+    id: string;
+    name: string;
+}
+
 export interface Candidate {
     id: string;
     name: string;
@@ -6,6 +11,7 @@ export interface Candidate {
     imageUrl: string;
     votes: number;
     color: string;
+    election_id: string;
 }
 
 export interface ElectionStats {
@@ -14,4 +20,11 @@ export interface ElectionStats {
     eligibleVoters: number;
     timeRemaining: string;
     lastUpdated: string;
+}
+
+export interface ElectionResult {
+    electionId: number;
+    electionName: string;
+    electionDescription: string;
+    candidates: any[]; // Raw data from API
 }

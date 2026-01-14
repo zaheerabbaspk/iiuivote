@@ -11,7 +11,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [IonApp, IonRouterOutlet, HeaderComponent],
 })
-
 export class AppComponent {
   private router = inject(Router);
 
