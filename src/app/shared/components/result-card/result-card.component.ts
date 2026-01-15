@@ -15,6 +15,6 @@ export class ResultCardComponent {
 
     percentage = computed(() => {
         if (this.totalVotes() === 0) return 0;
-        return (this.candidate().votes / this.totalVotes()) * 100;
+        return ((this.candidate().votes ?? 0) / this.totalVotes()) * 100;
     });
 }

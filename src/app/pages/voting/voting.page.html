@@ -16,26 +16,26 @@
         <div *ngIf="!selectedElection()" class="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div *ngFor="let election of elections()" (click)="selectElection(election)"
                 class="group relative flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden"
-                [ngClass]="getSelectionForElection(election.id) ? 'border-blue-500 bg-blue-50/10' : 'border-gray-100 bg-white hover:border-blue-200 hover:shadow-md'">
+                [ngClass]="hasSelectionsForElection(election.id) ? 'border-blue-500 bg-blue-50/10' : 'border-gray-100 bg-white hover:border-blue-200 hover:shadow-md'">
 
                 <div class="flex items-center gap-4">
                     <div class="p-3 rounded-xl transition-colors duration-300"
-                        [ngClass]="getSelectionForElection(election.id) ? 'bg-blue-600 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500'">
-                        <ion-icon [name]="getSelectionForElection(election.id) ? 'checkmark-circle' : 'school-outline'"
+                        [ngClass]="hasSelectionsForElection(election.id) ? 'bg-blue-600 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500'">
+                        <ion-icon [name]="hasSelectionsForElection(election.id) ? 'checkmark-circle' : 'school-outline'"
                             class="text-2xl"></ion-icon>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{
                             election.name }}</h3>
                         <div class="flex items-center gap-2">
-                            <p *ngIf="!getSelectionForElection(election.id)"
+                            <p *ngIf="!hasSelectionsForElection(election.id)"
                                 class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">No candidate
                                 selected</p>
-                            <div *ngIf="getSelectionForElection(election.id)" class="flex items-center gap-1.5">
+                            <div *ngIf="hasSelectionsForElection(election.id)" class="flex items-center gap-1.5">
                                 <span
                                     class="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Selected:</span>
                                 <span class="text-xs font-bold text-gray-700">{{
-                                    getSelectionForElection(election.id)?.name }}</span>
+                                    getSelectionCountForElection(election.id) }} Candidates</span>
                             </div>
                         </div>
                     </div>
@@ -68,11 +68,21 @@
                 Back to Elections
             </div>
 
-            <div class="space-y-4 mb-32">
-                <div *ngFor="let candidate of filteredCandidates()">
-                    <app-candidate-card [candidate]="candidate" [selected]="getSelectedCandidateId() === candidate.id"
-                        (select)="selectCandidate($event)">
-                    </app-candidate-card>
+            <div class="space-y-8 mb-32">
+                <div *ngFor="let group of candidatesByPosition()">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-gray-800">{{ group.name }}</h2>
+                        <ion-badge *ngIf="getSelectedCandidateName(group.name)" color="success" mode="ios">
+                            Selection Made
+                        </ion-badge>
+                    </div>
+                    <div class="space-y-4">
+                        <div *ngFor="let candidate of group.candidates">
+                            <app-candidate-card [candidate]="candidate" [selected]="isCandidateSelected(candidate)"
+                                (select)="selectCandidate($event)">
+                            </app-candidate-card>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -98,17 +108,19 @@
         </div>
 
         <!-- Mini Selection Bar in Candidates View -->
-        <div *ngIf="selectedElection() && getSelectedCandidateId()"
+        <div *ngIf="selectedElection() && getSelectionCountForElection(selectedElection()!.id) > 0"
             class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-white border border-gray-100 rounded-3xl shadow-2xl p-4 animate-in slide-in-from-bottom-5">
             <div class="flex items-center justify-between gap-3">
                 <div class="flex-1 min-w-0 bg-blue-50/50 px-4 py-3 rounded-2xl">
-                    <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Selected Candidate:
+                    <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Current Progress:</p>
+                    <p class="text-base font-bold text-gray-900 truncate">
+                        {{ getSelectionCountForElection(selectedElection()!.id) }} / {{
+                        selectedElection()!.positions.length }} Positions Filled
                     </p>
-                    <p class="text-base font-bold text-gray-900 truncate">{{ getSelectedCandidateName() }}</p>
                 </div>
                 <button (click)="clearSelection()"
                     class="bg-[#0549b4] text-white font-bold px-6 py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
-                    Confirm Selection
+                    Done
                 </button>
             </div>
         </div>

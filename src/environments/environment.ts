@@ -4,8 +4,9 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://192.168.1.23:8000'
+  apiUrl: 'https://big-zelda-iiuibackend-1cdf3bd6.koyeb.app'
 };
+
 
 /*
  * For easier debugging in development mode, you can import the following file

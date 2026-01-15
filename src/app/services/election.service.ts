@@ -58,38 +58,43 @@ export class ElectionService {
 
         if (data.authorizedElections) {
             this.electionsSubject.next(data.authorizedElections);
-        }
 
-        if (data.candidates) {
-            const mappedCandidates: Candidate[] = data.candidates.map((c: any) => ({
-                id: c.id?.toString(),
-                name: c.name,
-                department: c.position,
-                description: c.party,
-                imageUrl: c.image_url || c.image,
-                election_id: c.election_id?.toString(),
-                votes: c.votes || 0,
-                color: c.color || '#428cff'
-            }));
-            this.candidatesSubject.next(mappedCandidates);
+            // Extract and flatten candidates from all elections
+            const allCandidates: Candidate[] = [];
+            data.authorizedElections.forEach((election: any) => {
+                if (election.candidates) {
+                    election.candidates.forEach((c: any) => {
+                        allCandidates.push({
+                            id: c.id,
+                            name: c.name,
+                            position: c.position,
+                            image: c.image || c.image_url,
+                            party: c.party || c.department,
+                            color: c.color || '#428cff',
+                            votes: c.votes || 0
+                        });
+                    });
+                }
+            });
+            this.candidatesSubject.next(allCandidates);
         }
     }
 
-    getCandidatesByElection(electionId: string): Observable<Candidate[]> {
-        return this.candidates$.pipe(
-            map(candidates => candidates.filter(c => c.election_id === electionId))
+    getCandidatesByElection(electionId: number): Observable<Candidate[]> {
+        return this.elections$.pipe(
+            map(elections => {
+                const election = elections.find(e => e.id === electionId);
+                return election ? election.candidates : [];
+            })
         );
     }
 
-    submitVote(candidateIds: string | string[]): Observable<any> {
+    submitVote(candidateIds: number[]): Observable<any> {
         const token = localStorage.getItem('votingToken');
-        const payload: any = { token };
-
-        if (Array.isArray(candidateIds)) {
-            payload.candidateIds = candidateIds.map(id => Number(id));
-        } else {
-            payload.candidateId = Number(candidateIds);
-        }
+        const payload: any = {
+            token,
+            candidateIds: candidateIds
+        };
 
         return this.http.post(`${this.apiUrl}/vote`, payload);
     }

@@ -79,12 +79,31 @@
                 </div>
             </div>
 
-            <div class="space-y-6">
-                @if (sortedCandidates().length > 0) {
-                @for (candidate of sortedCandidates(); track candidate.id; let i = $index) {
-                <div class="opacity-0 animate-slide-up" [class]="'animate-delay-' + (i + 1)">
-                    <app-result-card [candidate]="candidate" [totalVotes]="totalVotesCount()"
-                        [rank]="i + 1"></app-result-card>
+            <div class="space-y-12">
+                @if (resultsByPosition().length > 0) {
+                @for (position of resultsByPosition(); track position.name) {
+                <div class="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
+                            <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">
+                                {{ position.name }}
+                            </h2>
+                        </div>
+                        <ion-badge color="light" class="font-bold text-[10px] uppercase tracking-wider px-2.5 py-1">
+                            {{ position.totalVotes | number }} Total Votes
+                        </ion-badge>
+                    </div>
+
+                    <div class="grid gap-4">
+                        @for (candidate of position.candidates; track candidate.id; let i = $index) {
+                        <div class="opacity-0 animate-slide-up" [style.animation-delay]="(i * 100) + 'ms'"
+                            style="animation-fill-mode: forwards;">
+                            <app-result-card [candidate]="candidate" [totalVotes]="position.totalVotes"
+                                [rank]="i + 1"></app-result-card>
+                        </div>
+                        }
+                    </div>
                 </div>
                 }
                 } @else if (selectedElectionId()) {
@@ -92,8 +111,8 @@
                     <div class="p-4 bg-gray-50 rounded-full mb-3">
                         <ion-icon name="people-outline" class="text-3xl text-gray-300"></ion-icon>
                     </div>
-                    <h3 class="text-base font-bold text-gray-900">No Candidates Found</h3>
-                    <p class="text-xs text-gray-400 max-w-[200px]">There are no candidates registered for this election
+                    <h3 class="text-base font-bold text-gray-900">No Results Found</h3>
+                    <p class="text-xs text-gray-400 max-w-[200px]">There are no results recorded for this election
                         yet.</p>
                 </div>
                 }

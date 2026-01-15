@@ -1,17 +1,18 @@
 export interface Election {
-    id: string;
+    id: number;
     name: string;
+    positions: string[];
+    candidates: Candidate[];
 }
 
 export interface Candidate {
-    id: string;
+    id: number;
     name: string;
-    department: string;
-    description: string;
-    imageUrl: string;
-    votes: number;
-    color: string;
-    election_id: string;
+    position: string;
+    image?: string;
+    party?: string;
+    color?: string;
+    votes?: number;
 }
 
 export interface ElectionStats {
@@ -22,9 +23,15 @@ export interface ElectionStats {
     lastUpdated: string;
 }
 
+export interface PositionResult {
+    positionName: string;
+    candidates: any[];
+}
+
 export interface ElectionResult {
     electionId: number;
     electionName: string;
     electionDescription: string;
-    candidates: any[]; // Raw data from API
+    resultsByPosition?: PositionResult[];
+    candidates?: any[]; // Keep for compatibility if needed
 }

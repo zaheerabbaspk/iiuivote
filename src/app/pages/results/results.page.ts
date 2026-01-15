@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonBadge } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { refreshOutline, shareSocialOutline, peopleOutline, trendingUpOutline, timeOutline, checkboxOutline, chevronDownOutline } from 'ionicons/icons';
 import { Candidate, ElectionStats, ElectionResult } from '../../models/election.model';
@@ -11,7 +11,7 @@ import { ElectionService } from '../../services/election.service';
 @Component({
     selector: 'app-results',
     standalone: true,
-    imports: [CommonModule, IonContent, IonIcon, ResultCardComponent, StatCardComponent],
+    imports: [CommonModule, IonContent, IonIcon, IonBadge, ResultCardComponent, StatCardComponent],
     templateUrl: './results.page.html',
 })
 export class ResultsPage implements OnInit {
@@ -25,42 +25,46 @@ export class ResultsPage implements OnInit {
         return this.allElectionResults().find(e => e.electionId === this.selectedElectionId());
     });
 
-    candidates = computed<Candidate[]>(() => {
+    resultsByPosition = computed(() => {
         const election = this.selectedElection();
-        if (!election) return [];
+        if (!election || !election.resultsByPosition) return [];
 
-        return election.candidates.map(c => ({
-            id: (c.id || c.candidate_id)?.toString(),
-            name: c.name,
-            department: c.position || c.department,
-            description: c.party || c.description,
-            imageUrl: c.image_url || c.imageUrl || c.image,
-            votes: Number(c.vote_count || c.votes || 0),
-            color: c.color || this.getRandomColor(),
-            election_id: (c.election_id || election.electionId).toString()
+        return election.resultsByPosition.map(pos => ({
+            name: pos.positionName,
+            candidates: pos.candidates.map(c => ({
+                id: Number(c.id || c.candidate_id),
+                name: c.name,
+                position: c.position || c.department,
+                party: c.party || c.description,
+                image: c.image_url || c.imageUrl || c.image,
+                votes: Number(c.vote_count || c.votes || 0),
+                color: c.color || this.getRandomColor()
+            })).sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0)),
+            totalVotes: pos.candidates.reduce((acc, curr) => acc + Number(curr.vote_count || curr.votes || 0), 0)
         }));
     });
 
     stats = computed<ElectionStats>(() => {
-        const mappedCandidates = this.candidates();
-        const total = mappedCandidates.reduce((acc, curr) => acc + curr.votes, 0);
+        const results = this.resultsByPosition();
+        // For total votes, we might want to sum all votes cast across all positions, 
+        // OR just the total unique voters if that data was available. 
+        // Given the payload, summing votes in the first position is usually what people mean by "Total Votes Cast" 
+        // in a multi-choice election, or we sum them all. Let's sum unique votes per position for transparency.
+        const total = results.reduce((acc, curr) => acc + curr.candidates.reduce((a, b) => a + (b.votes ?? 0), 0), 0);
         const eligibleVoters = 5420;
 
         return {
-            totalVotes: total,
-            voterTurnout: parseFloat(((total / eligibleVoters) * 100).toFixed(1)),
+            totalVotes: results.length > 0 ? results[0].totalVotes : 0, // Showing votes from first position as representative
+            voterTurnout: parseFloat((((results.length > 0 ? results[0].totalVotes : 0) / eligibleVoters) * 100).toFixed(1)),
             eligibleVoters: eligibleVoters,
-            timeRemaining: '0h 0m',
+            timeRemaining: 'Ended',
             lastUpdated: this.lastUpdated()
         };
     });
 
     totalVotesCount = computed(() => {
-        return this.candidates().reduce((acc, curr) => acc + curr.votes, 0);
-    });
-
-    sortedCandidates = computed(() => {
-        return [...this.candidates()].sort((a, b) => b.votes - a.votes);
+        const results = this.resultsByPosition();
+        return results.length > 0 ? results[0].totalVotes : 0;
     });
 
     constructor() {

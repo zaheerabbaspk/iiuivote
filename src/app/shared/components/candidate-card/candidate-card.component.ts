@@ -15,13 +15,13 @@ import { SafeUrlPipe } from '../../pipes/safe-url.pipe';
 export class CandidateCardComponent {
     candidate = input.required<Candidate>();
     selected = input<boolean>(false);
-    select = output<string>();
+    select = output<Candidate>();
 
     constructor() {
         addIcons({ checkmarkCircle, personCircleOutline });
     }
 
     onSelect() {
-        this.select.emit(this.candidate().id);
+        this.select.emit(this.candidate());
     }
 }

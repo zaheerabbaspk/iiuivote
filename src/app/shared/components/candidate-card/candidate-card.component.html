@@ -18,11 +18,11 @@
     <!-- Candidate Image -->
     <div class="relative flex-shrink-0">
         <!-- Show Image if available -->
-        <img *ngIf="candidate().imageUrl" [src]="candidate().imageUrl | safeUrl" [alt]="candidate().name"
+        <img *ngIf="candidate().image" [src]="candidate().image | safeUrl" [alt]="candidate().name"
             class="w-20 h-20 rounded-xl object-cover shadow-sm border border-gray-100" />
 
         <!-- Show Icon if no image -->
-        <ion-icon *ngIf="!candidate().imageUrl" name="person-circle-outline" class="w-20 h-20 text-gray-300"></ion-icon>
+        <ion-icon *ngIf="!candidate().image" name="person-circle-outline" class="w-20 h-20 text-gray-300"></ion-icon>
 
         @if (selected()) {
         <div
@@ -38,10 +38,10 @@
             {{ candidate().name }}
         </h3>
         <p class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-            {{ candidate().department }}
+            {{ candidate().position }}
         </p>
         <p class="text-sm text-gray-500 leading-relaxed line-clamp-2 font-medium">
-            {{ candidate().description }}
+            {{ candidate().party }}
         </p>
     </div>
 

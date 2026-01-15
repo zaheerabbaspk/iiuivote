@@ -25,13 +25,24 @@ export class VotingPage {
     selectedElection = signal<Election | null>(null);
     filteredCandidates = signal<Candidate[]>([]);
 
-    // Track selections: { electionId: candidateId }
-    selections = signal<Record<string, string>>({});
+    // Track selections: { "electionId_position": candidateId }
+    selections = signal<Record<string, number>>({});
 
     isLoading = signal<boolean>(false);
     isSubmitted = signal<boolean>(false);
 
-    // Derived signal for payload
+    // Derived signal for grouped candidates
+    candidatesByPosition = computed(() => {
+        const election = this.selectedElection();
+        if (!election) return [];
+
+        return election.positions.map(pos => ({
+            name: pos,
+            candidates: election.candidates.filter(c => c.position === pos)
+        }));
+    });
+
+    // Total selections across all elections/positions
     selectionCount = computed(() => Object.keys(this.selections()).length);
 
     constructor() {
@@ -41,8 +52,7 @@ export class VotingPage {
     selectElection(election: Election) {
         if (this.isSubmitted()) return;
         this.selectedElection.set(election);
-        const candidates = this.allCandidates().filter(c => c.election_id === election.id);
-        this.filteredCandidates.set(candidates);
+        this.filteredCandidates.set(election.candidates);
     }
 
     clearSelection() {
@@ -50,30 +60,35 @@ export class VotingPage {
         this.filteredCandidates.set([]);
     }
 
-    selectCandidate(candidateId: string) {
+    selectCandidate(candidate: Candidate) {
         const election = this.selectedElection();
         if (election) {
             this.selections.update(s => ({
                 ...s,
-                [election.id]: candidateId
+                [`${election.id}_${candidate.position}`]: candidate.id
             }));
         }
     }
 
-    getSelectedCandidateId() {
+    isCandidateSelected(candidate: Candidate): boolean {
         const election = this.selectedElection();
-        return election ? (this.selections()[election.id] || null) : null;
+        if (!election) return false;
+        return this.selections()[`${election.id}_${candidate.position}`] === candidate.id;
     }
 
-    getSelectedCandidateName() {
-        const id = this.getSelectedCandidateId();
-        return this.filteredCandidates().find(c => c.id === id)?.name;
+    getSelectedCandidateName(position: string) {
+        const election = this.selectedElection();
+        if (!election) return null;
+        const candidateId = this.selections()[`${election.id}_${position}`];
+        return election.candidates.find(c => c.id === candidateId)?.name;
     }
 
-    getSelectionForElection(electionId: string) {
-        const candidateId = this.selections()[electionId];
-        if (!candidateId) return null;
-        return this.allCandidates().find(c => c.id === candidateId);
+    getSelectionCountForElection(electionId: number): number {
+        return Object.keys(this.selections()).filter(key => key.startsWith(`${electionId}_`)).length;
+    }
+
+    hasSelectionsForElection(electionId: number): boolean {
+        return this.getSelectionCountForElection(electionId) > 0;
     }
 
     castVotes() {
@@ -82,10 +97,7 @@ export class VotingPage {
 
         this.isLoading.set(true);
 
-        // If only 1 selection, send as single ID, otherwise as array
-        const payload = candidateIds.length === 1 ? candidateIds[0] : candidateIds;
-
-        this.electionService.submitVote(payload).subscribe({
+        this.electionService.submitVote(candidateIds).subscribe({
             next: (res) => {
                 this.isLoading.set(false);
                 this.isSubmitted.set(true);
